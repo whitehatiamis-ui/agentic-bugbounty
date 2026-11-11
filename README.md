@@ -188,3 +188,6 @@ ln -sf ../../scripts/preflight.sh .git/hooks/pre-push
 ## License
 
 MIT — see `LICENSE`.
+
+Using this software against a system you do not have written authorisation to test is
+outside the licence and outside the law. The authors provide tooling, not permission.
