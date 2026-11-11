@@ -13,15 +13,15 @@ SCOPE = textwrap.dedent(
     program: test-program
     allowed:
       hosts:
-        - "*.topperpay.com"
-        - topperpay.com
+        - "*.example.com"
+        - example.com
       schemes: [https]
       methods: [GET, POST]
       ports:
         https: [443]
     excluded:
       hosts:
-        - "payments.topperpay.com"
+        - "payments.example.com"
       paths:
         - "/admin/*"
     forbidden_techniques:
@@ -55,11 +55,11 @@ def guard(scope):
 
 
 def test_subdomain_allowed(guard):
-    assert guard.check("GET", "https://api.topperpay.com/v1/widgets")
+    assert guard.check("GET", "https://api.example.com/v1/widgets")
 
 
 def test_apex_allowed_when_listed(guard):
-    assert guard.check("GET", "https://topperpay.com/")
+    assert guard.check("GET", "https://example.com/")
 
 
 def test_wildcard_does_not_cover_apex(tmp_path):
@@ -78,43 +78,43 @@ def test_unrelated_host_denied(guard):
 
 
 def test_suffix_confusion_denied(guard):
-    assert not guard.check("GET", "https://api.topperpay.com.evil.com/")
+    assert not guard.check("GET", "https://api.example.com.evil.com/")
 
 
 def test_userinfo_does_not_hide_host(guard):
     # urlsplit().hostname is what saves us here; netloc would read as allowed.
-    assert not guard.check("GET", "https://api.topperpay.com@evil.com/")
+    assert not guard.check("GET", "https://api.example.com@evil.com/")
 
 
 def test_excluded_host_beats_allowlist(guard):
-    decision = guard.check("GET", "https://payments.topperpay.com/")
+    decision = guard.check("GET", "https://payments.example.com/")
     assert not decision
     assert decision.rule == "excluded-host"
 
 
 def test_excluded_path(guard):
-    assert not guard.check("GET", "https://api.topperpay.com/admin/shutdown")
-    assert guard.check("GET", "https://api.topperpay.com/public")
+    assert not guard.check("GET", "https://api.example.com/admin/shutdown")
+    assert guard.check("GET", "https://api.example.com/public")
 
 
 def test_plain_http_denied(guard):
-    decision = guard.check("GET", "http://api.topperpay.com/")
+    decision = guard.check("GET", "http://api.example.com/")
     assert not decision
     assert decision.rule == "scheme"
 
 
 def test_non_default_port_denied(guard):
-    assert not guard.check("GET", "https://api.topperpay.com:8443/")
+    assert not guard.check("GET", "https://api.example.com:8443/")
 
 
 def test_method_outside_allowlist(guard):
-    decision = guard.check("DELETE", "https://api.topperpay.com/x")
+    decision = guard.check("DELETE", "https://api.example.com/x")
     assert not decision
     assert decision.rule == "method"
 
 
 def test_forbidden_technique(guard):
-    decision = guard.check("GET", "https://api.topperpay.com/", technique="dos")
+    decision = guard.check("GET", "https://api.example.com/", technique="dos")
     assert not decision
     assert decision.rule == "technique"
 
@@ -127,20 +127,20 @@ def test_rate_limit_engages(scope):
     clock = Clock()
     g = ScopeGuard(scope, clock=clock)
     g.rps = 2.0
-    assert g.check("GET", "https://api.topperpay.com/")
-    assert g.check("GET", "https://api.topperpay.com/")
-    third = g.check("GET", "https://api.topperpay.com/")
+    assert g.check("GET", "https://api.example.com/")
+    assert g.check("GET", "https://api.example.com/")
+    third = g.check("GET", "https://api.example.com/")
     assert not third and third.rule == "rate-limit"
     clock.now += 1.0
-    assert g.check("GET", "https://api.topperpay.com/")
+    assert g.check("GET", "https://api.example.com/")
 
 
 def test_per_host_cap(scope):
     g = ScopeGuard(scope, clock=Clock())
     g.max_requests_per_host = 2
-    assert g.check("GET", "https://api.topperpay.com/")
-    assert g.check("GET", "https://api.topperpay.com/")
-    capped = g.check("GET", "https://api.topperpay.com/")
+    assert g.check("GET", "https://api.example.com/")
+    assert g.check("GET", "https://api.example.com/")
+    capped = g.check("GET", "https://api.example.com/")
     assert not capped and capped.rule == "budget"
 
 
