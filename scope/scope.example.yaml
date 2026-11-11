@@ -1,0 +1,40 @@
+# Scope file — the single source of truth for what the agent may touch.
+#
+# Copy to scope.yaml and fill it from the program brief. Nothing else in this repo
+# decides what is in scope; if it is not written here, the agent cannot reach it.
+# `scope.yaml` is gitignored on purpose: program briefs are not always public.
+
+program: example-program
+platform: hackerone
+
+allowed:
+  # Explicit patterns only. `*.example.com` covers every subdomain but NOT the apex,
+  # so list the apex separately when the brief includes it.
+  hosts:
+    - "*.example.com"
+    - example.com
+  schemes: [https]
+  methods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+  ports:
+    https: [443]
+
+excluded:
+  # Program carve-outs. These beat the allowlist — exclusion is checked first.
+  hosts:
+    - "status.example.com"
+    - "*.cdn.example.com"
+  paths:
+    - "/admin/shutdown*"
+    - "/internal/*"
+
+# Hard classes. If a technique appears here the guard refuses it even on an
+# in-scope host — most programs exclude these outright.
+forbidden_techniques:
+  - dos
+  - social-engineering
+  - mass-targeting
+  - physical
+
+limits:
+  rps: 5                 # requests per second, per host
+  max_requests_per_host: 2000

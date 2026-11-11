@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Program material — never commit a scope brief or an unpublished finding
+scope/scope.yaml
+state/
+*.local.yaml
+
+# Secrets — the repo must stay clean enough to publish at any moment
+.env
+.env.*
+*.pem
+*.key
+credentials*
+secrets/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
